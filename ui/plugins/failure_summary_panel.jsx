@@ -1,5 +1,4 @@
-'use strict';
-const PropTypes = require('prop-types');
+import PropTypes from 'prop-types';
 
 class SuggestionsListItem extends React.Component {
     constructor(props) {
@@ -209,13 +208,13 @@ FailureSummaryPanel.propTypes = {
     logParseStatus: PropTypes.string
 };
 
-module.exports = {
-    FailureSummaryPanel,
-    SuggestionsListItem,
-    BugListItem,
-    ErrorsList,
-    ListItem
-};
+// module.exports = {
+//     FailureSummaryPanel,
+//     SuggestionsListItem,
+//     BugListItem,
+//     ErrorsList,
+//     ListItem
+// };
 
 treeherder.directive('failureSummaryPanel', ['reactDirective', '$injector', (reactDirective, $injector) =>
 reactDirective(FailureSummaryPanel, undefined, {}, { $injector })]);
