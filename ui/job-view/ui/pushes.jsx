@@ -6,7 +6,7 @@ import { connect, Provider } from "react-redux";
 import { actions, store } from '../redux/store';
 import * as aggregateIds from '../aggregateIds';
 import { platformMap } from "../../js/constants";
-import * as angularProviders from "../redux/modules/angularProviders";
+import * as angular from "../redux/modules/angular";
 import * as pushes from "../redux/modules/pushes";
 import * as _ from 'lodash';
 import { react2angular } from 'react2angular';
@@ -20,7 +20,8 @@ const JobPlatformDataComponent = (props) => {
   );
 };
 
-const mapJobDataStateToProps = ({ pushes }) => pushes;
+// TODO: do we need to map state to props?  do we use pushes?
+// const mapJobDataStateToProps = ({ pushes }) => ({ pushes });
 
 class JobDataComponent extends React.PureComponent {
   render() {
@@ -59,16 +60,16 @@ class JobTableRowComponent extends React.PureComponent {
       <tr id={this.props.platform.id}
           key={this.props.platform.id}>
         <JobPlatformDataComponent platform={this.props.platform}/>
-        <JobData groups={this.props.platform.groups}
+        <JobDataComponent groups={this.props.platform.groups}
                  ref="data"/>
       </tr>
     );
   }
 }
 
-const mapJobTableStateToProps = ({ angularProviders, pushes }) => ({
-  ...angularProviders,
-  ...pushes,
+const mapJobTableStateToProps = ({ angular, pushes }) => ({
+  angular,
+  pushes,
 });
 
 class JobTableComponent extends React.Component {
@@ -78,23 +79,23 @@ class JobTableComponent extends React.Component {
     this.rsMap = null;
     this.pushId = this.props.push.id;
     this.aggregateId = aggregateIds.getResultsetTableId(
-      this.props.$rootScope.repoName,
+      this.props.angular.$rootScope.repoName,
       this.pushId,
       this.props.push.revision
     );
 
-    const showDuplicateJobs = this.props.$location.search().duplicate_jobs === 'visible';
-    const expanded = this.props.$location.search().group_state === 'expanded';
+    const showDuplicateJobs = this.props.angular.$location.search().duplicate_jobs === 'visible';
+    const expanded = this.props.angular.$location.search().group_state === 'expanded';
     store.dispatch(actions.pushes.setGlobalGroupStates({ showDuplicateJobs, expanded }));
   }
 
   applyNewJobs() {
-    this.rsMap = this.props.ThResultSetStore.getResultSetsMap(this.props.$rootScope.repoName);
+    this.rsMap = this.props.angular.ThResultSetStore.getResultSetsMap(this.props.angular.$rootScope.repoName);
     if (!this.rsMap[this.pushId] || !this.rsMap[this.pushId].rs_obj.platforms) {
       return;
     }
 
-    const platforms = this.props.platforms[this.pushId] || {};
+    const platforms = this.props.pushes.platforms[this.pushId] || {};
     this.rsMap[this.pushId].rs_obj.platforms.forEach((platform) => {
       platform.id = this.getIdForPlatform(platform);
       platform.name = platformMap[platform.name] || platform.name;
@@ -113,10 +114,10 @@ class JobTableComponent extends React.Component {
   componentWillMount() {
     // Check for a selected job in the result set store
     let selectedJobId = null;
-    let selectedJobObj = this.props.ThResultSetStore.getSelectedJob(this.props.$rootScope.repoName);
+    let selectedJobObj = this.props.angular.ThResultSetStore.getSelectedJob(this.props.angular.$rootScope.repoName);
     if (_.isEmpty(selectedJobObj.job)) {
       // Check the URL
-      const jobId = this.props.$location.search().selectedJob;
+      const jobId = this.props.angular.$location.search().selectedJob;
       if (jobId) {
         selectedJobId = parseInt(jobId);
       }
@@ -131,40 +132,40 @@ class JobTableComponent extends React.Component {
 
   componentDidMount() {
 
-    this.props.$rootScope.$on(
-      this.props.thEvents.applyNewJobs, (ev, appliedpushId) => {
+    this.props.angular.$rootScope.$on(
+      this.props.angular.thEvents.applyNewJobs, (ev, appliedpushId) => {
         if (appliedpushId === this.pushId) {
           this.applyNewJobs();
         }
       }
     );
 
-    this.props.$rootScope.$on(
-      this.props.thEvents.changeSelection, (ev, direction, jobNavSelector) => {
+    this.props.angular.$rootScope.$on(
+      this.props.angular.thEvents.changeSelection, (ev, direction, jobNavSelector) => {
         this.changeSelectedJob(ev, direction, jobNavSelector);
       }
     );
 
-    this.props.$rootScope.$on(
-      this.props.thEvents.clearSelectedJob, () => {
-        store.dispatch(actions.pushes.selectJob(null, this.props.$rootScope));
+    this.props.angular.$rootScope.$on(
+      this.props.angular.thEvents.clearSelectedJob, () => {
+        store.dispatch(actions.pushes.selectJob(null, this.props.angular.$rootScope));
       }
     );
 
-    this.props.$rootScope.$on(
-      this.props.thEvents.globalFilterChanged, () => {
+    this.props.angular.$rootScope.$on(
+      this.props.angular.thEvents.globalFilterChanged, () => {
         this.filterJobs();
       }
     );
 
-    this.props.$rootScope.$on(
-      this.props.thEvents.groupStateChanged, () => {
+    this.props.angular.$rootScope.$on(
+      this.props.angular.thEvents.groupStateChanged, () => {
         this.filterJobs();
       }
     );
 
-    this.props.$rootScope.$on(
-      this.props.thEvents.searchPage, () => {
+    this.props.angular.$rootScope.$on(
+      this.props.angular.thEvents.searchPage, () => {
         this.filterJobs();
       }
     );
@@ -172,13 +173,13 @@ class JobTableComponent extends React.Component {
   }
 
   changeSelectedJob(ev, direction, jobNavSelector) {
-    if (this.props.$rootScope.selectedJob) {
-      if (this.props.$rootScope.selectedJob.push_id !== this.pushId) {
+    if (this.props.angular.$rootScope.selectedJob) {
+      if (this.props.angular.$rootScope.selectedJob.push_id !== this.pushId) {
         return;
       }
     }
 
-    const jobMap = this.props.ThResultSetStore.getJobMap(this.props.$rootScope.repoName);
+    const jobMap = this.props.angular.ThResultSetStore.getJobMap(this.props.angular.$rootScope.repoName);
     let el, key, jobs, getIndex;
 
     if (direction === 'next') {
@@ -216,24 +217,24 @@ class JobTableComponent extends React.Component {
     // if there was no new job selected, then ensure that we clear any job that
     // was previously selected.
     if ($(".selected-job").css('display') === 'none') {
-      this.props.$rootScope.closeJob();
+      this.props.angular.$rootScope.closeJob();
     }
   }
 
   selectJob(job) {
     // Delay switching jobs right away, in case the user is switching rapidly between jobs
-    store.dispatch(actions.pushes.selectJob(job, this.props.$rootScope));
+    store.dispatch(actions.pushes.selectJob(job, this.props.angular.$rootScope));
     if (this.jobChangedTimeout) {
       window.clearTimeout(this.jobChangedTimeout);
     }
     this.jobChangedTimeout = window.setTimeout(() => {
-      this.props.$rootScope.$emit(this.props.thEvents.jobClick, job);
+      this.props.angular.$rootScope.$emit(this.props.angular.thEvents.jobClick, job);
     }, 200);
   }
 
   getIdForPlatform(platform) {
     return aggregateIds.getPlatformRowId(
-      this.props.$rootScope.repoName,
+      this.props.angular.$rootScope.repoName,
       this.props.push.id,
       platform.name,
       platform.option
@@ -241,8 +242,8 @@ class JobTableComponent extends React.Component {
   }
 
   filterJobs() {
-    if (_.isEmpty(this.props.platforms)) return;
-    const pushPlatforms = Object.values(this.props.platforms[this.pushId]).reduce((acc, platform) => ({
+    if (_.isEmpty(this.props.pushes.platforms)) return;
+    const pushPlatforms = Object.values(this.props.pushes.platforms[this.pushId]).reduce((acc, platform) => ({
       ...acc, [platform.id]: this.filterPlatform(platform)
     }), {});
     store.dispatch(pushes.actions.storePlatforms(this.pushId, pushPlatforms));
@@ -257,12 +258,12 @@ class JobTableComponent extends React.Component {
     platform.groups.forEach((group) => {
       group.visible = false;
       group.jobs.forEach((job) => {
-        job.visible = this.props.thJobFilters.showJob(job);
+        job.visible = this.props.angular.thJobFilters.showJob(job);
         if (this.rsMap && job.state === 'runnable') {
           job.visible = job.visible &&
             this.rsMap[job.result_set_id].rs_obj.isRunnableVisible;
         }
-        job.selected = job.id === this.props.selectedJobId;
+        job.selected = job.id === this.props.pushes.selectedJobId;
         if (job.visible) {
           platform.visible = true;
           group.visible = true;
@@ -274,7 +275,7 @@ class JobTableComponent extends React.Component {
 
   render() {
     console.log("render JobTableComponent");
-    const platforms = this.props.platforms[this.pushId] || {};
+    const platforms = this.props.pushes.platforms[this.pushId] || {};
     return (
       <table id={this.aggregateId} className="table-hover">
         <tbody onClick={this.handleJobClick}>
@@ -293,26 +294,32 @@ class JobTableComponent extends React.Component {
   }
 }
 
-const mapStateToProps = ({ angularProviders }) => angularProviders;
+const mapStateToProps = ({ angular }) => ({ angular });
 
 class PushComponent extends React.Component {
   constructor(props) {
     super(props);
-    store.dispatch(angularProviders.actions.storeProviders(this.props.$injector));
+    store.dispatch(angular.actions.storeProviders(this.props.$injector));
 
     this.aggregateId = aggregateIds.getResultsetTableId(
-      this.props.$rootScope.repoName, this.props.push.id, this.props.push.revision
+      this.props.angular.$rootScope.repoName, this.props.push.id, this.props.push.revision
     );
   }
 
+  shouldComponentUpdate(nextProps) {
+    console.log("nextProps", nextProps.push, nextProps);
+    // if (nextProps.push)
+    return true;
+  }
+
   render() {
-    console.log("render");
+    console.log("render push", this.props.push.id);
     return (
       <Provider store={store}>
         <div className="row result-set clearfix">
-          {this.props.$rootScope.currentRepo &&
+          {this.props.angular.$rootScope.currentRepo &&
           <RevisionList resultset={this.props.push}
-                        repo={this.props.$rootScope.currentRepo}/>}
+                        repo={this.props.angular.$rootScope.currentRepo}/>}
           <span className="job-list job-list-pad col-7">
               <JobTable push={this.props.push}/>
             </span>
@@ -333,4 +340,4 @@ treeherder.component('push',
                                    ['push'], ['$injector', 'store']));
 
 export const JobTable = connect(mapJobTableStateToProps)(JobTableComponent);
-export const JobData = connect(mapJobDataStateToProps)(JobDataComponent);
+// export const JobData = connect(mapJobDataStateToProps)(JobDataComponent);

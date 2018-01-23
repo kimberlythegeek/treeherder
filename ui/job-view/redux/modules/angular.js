@@ -1,6 +1,5 @@
 export const types = {
   STORE_PROVIDERS: "STORE_PROVIDERS",
-  DUMMY: "DUMMY"
 };
 
 export const actions = {
@@ -15,14 +14,14 @@ export const actions = {
 const initialState = {
   $rootScope: {},
   thEvents: {},
-  thResultStatus: {},
-  thResultStatusInfo: {},
   $location: {},
-  ThResultSetStore: {},
   thUrl: {},
   thJobModel: {},
   thJobFilters: {},
   linkifyBugsFilter: {},
+  thResultStatus: {},
+  thResultStatusInfo: {},
+  ThResultSetStore: {},
 };
 
 // As we transition away from Angular and toward React, more and more of these
@@ -35,15 +34,15 @@ export const reducer = (state = initialState, action) => {
         ...state,
         $rootScope: action.payload.$injector.get('$rootScope'),
         thEvents: action.payload.$injector.get('thEvents'),
-        thResultStatus: action.payload.$injector.get('thResultStatus'),
-        thResultStatusInfo: action.payload.$injector.get('thResultStatusInfo'),
         $location: action.payload.$injector.get('$location'),
-        ThResultSetStore: action.payload.$injector.get('ThResultSetStore'),
         thUrl: action.payload.$injector.get('thUrl'),
         thJobModel: action.payload.$injector.get('ThJobModel'),
         // TODO: move these to shared libraries
         thJobFilters: action.payload.$injector.get('thJobFilters'),
         linkifyBugsFilter: action.payload.$injector.get('$filter')('linkifyBugs'),
+        thResultStatus: action.payload.$injector.get('thResultStatus'),
+        thResultStatusInfo: action.payload.$injector.get('thResultStatusInfo'),
+        ThResultSetStore: action.payload.$injector.get('ThResultSetStore'),
       };
     default:
       return state;

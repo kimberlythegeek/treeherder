@@ -4,12 +4,12 @@ import {
   combineReducers,
   applyMiddleware,
 } from 'redux';
-import * as angularProviders from './modules/angularProviders';
+import * as angular from './modules/angular';
 import * as pushes from './modules/pushes';
 import createDebounce from 'redux-debounce';
 
 function dummy(store, data) {
-  store.dispatch(angularProviders.types.DUMMY, data);
+  store.dispatch(angular.types.DUMMY, data);
 }
 
 const testDataMiddleware = store => next => (action) => {
@@ -21,7 +21,7 @@ const testDataMiddleware = store => next => (action) => {
   delete consumed.meta;
 
   switch (action.type) {
-    case angularProviders.types.DUMMY:
+    case angular.types.DUMMY:
       dummy(store, { ...action.meta });
       return next(consumed);
     default:
@@ -35,12 +35,12 @@ export const configureStore = () => {
   const debounceConfig = { filter: 300 };
   const debouncer = createDebounce(debounceConfig);
   const reducer = combineReducers({
-    angularProviders: angularProviders.reducer,
+    angular: angular.reducer,
     pushes: pushes.reducer,
   });
   const store = createStore(reducer, applyMiddleware(debouncer, testDataMiddleware));
   const actions = {
-    angularProviders: bindActionCreators(angularProviders.actions, store.dispatch),
+    angular: bindActionCreators(angular.actions, store.dispatch),
     pushes: bindActionCreators(pushes.actions, store.dispatch),
   };
 

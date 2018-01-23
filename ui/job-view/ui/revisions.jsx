@@ -74,7 +74,7 @@ const RevisionItem = (props) => {
     </li>;
 };
 
-const mapStateToProps = ({ angularProviders }) => angularProviders;
+const mapStateToProps = ({ angular }) => ({ angular });
 
 const RevisionListComponent = (props) => {
     const hasMore = props.resultset.revision_count > props.resultset.revisions.length;
@@ -83,7 +83,7 @@ const RevisionListComponent = (props) => {
             <ul className="list-unstyled">
                 {props.resultset.revisions.map((revision, i) =>
                     <RevisionItem
-                        linkifyBugsFilter={props.linkifyBugsFilter}
+                        linkifyBugsFilter={props.angular.linkifyBugsFilter}
                         revision={revision}
                         repo={props.repo}
                         key={i} />

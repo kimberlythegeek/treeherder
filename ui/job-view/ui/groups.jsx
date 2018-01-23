@@ -2,7 +2,7 @@ import { JobButton, JobCountComponent } from "./buttons";
 import { connect } from "react-redux";
 import * as _ from "lodash";
 
-const mapStateToProps = ({ angularProviders }) => angularProviders;
+const mapStateToProps = ({ angular }) => ({ angular });
 
 class JobGroupComponent extends React.Component {
   constructor(props) {
@@ -14,7 +14,7 @@ class JobGroupComponent extends React.Component {
 
 
     // if (!expanded) {
-    //   const selectedJobId = parseInt(this.props.$location.search().selectedJob);
+    //   const selectedJobId = parseInt(this.props.angular.$location.search().selectedJob);
     //   if (selectedJobId && this.props.group.jobs.some(job => job.id === selectedJobId )) {
     //     expanded = true;
     //   }
@@ -26,15 +26,15 @@ class JobGroupComponent extends React.Component {
   }
 
   componentWillMount() {
-    this.props.$rootScope.$on(
-      this.props.thEvents.duplicateJobsVisibilityChanged,
+    this.props.angular.$rootScope.$on(
+      this.props.angular.thEvents.duplicateJobsVisibilityChanged,
       () => {
         this.setState({ showDuplicateJobs: !this.state.showDuplicateJobs });
       }
     );
 
-    this.props.$rootScope.$on(
-      this.props.thEvents.groupStateChanged,
+    this.props.angular.$rootScope.$on(
+      this.props.angular.thEvents.groupStateChanged,
       (e, newState) => {
         this.setState({ expanded: newState === 'expanded' });
       }
@@ -58,8 +58,8 @@ class JobGroupComponent extends React.Component {
       const typeSymbolCounts = _.countBy(this.props.group.jobs, "job_type_symbol");
       this.props.group.jobs.map((job) => {
         if (!job.visible) return;
-        const status = this.props.thResultStatus(job);
-        let countInfo = this.props.thResultStatusInfo(status, job.failure_classification_id);
+        const status = this.props.angular.thResultStatus(job);
+        let countInfo = this.props.angular.thResultStatusInfo(status, job.failure_classification_id);
         if (['testfailed', 'busted', 'exception'].includes(status) ||
           (typeSymbolCounts[job.job_type_symbol] > 1 && this.state.showDuplicateJobs)) {
           // render the job itself, not a count

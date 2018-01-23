@@ -59,13 +59,16 @@
   },
   "devDependencies": {
     "angular-mocks": "1.6.8",
+    "babel-jest": "22.1.0",
     "enzyme": "3.3.0",
     "enzyme-adapter-react-16": "1.1.1",
     "jasmine-core": "2.9.1",
+    "jest": "22.1.4",
     "karma-firefox-launcher": "1.1.0",
     "karma-jasmine": "1.1.1",
     "neutrino-preset-karma": "4.2.1",
-    "react-test-renderer": "16.2.0"
+    "react-test-renderer": "16.2.0",
+    "redux-mock-store": "1.4.0"
   },
   "scripts": {
     "build": "node ./node_modules/neutrino/bin/neutrino build --presets ./neutrino-custom/production.js",
