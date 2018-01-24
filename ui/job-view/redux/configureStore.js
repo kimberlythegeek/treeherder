@@ -4,7 +4,7 @@ import {
   combineReducers,
   applyMiddleware,
 } from 'redux';
-import * as angular from './modules/angular';
+// import * as angular from './modules/angular';
 import * as pushes from './modules/pushes';
 import createDebounce from 'redux-debounce';
 
@@ -35,12 +35,12 @@ export const configureStore = () => {
   const debounceConfig = { filter: 300 };
   const debouncer = createDebounce(debounceConfig);
   const reducer = combineReducers({
-    angular: angular.reducer,
+    // angular: angular.reducer,
     pushes: pushes.reducer,
   });
   const store = createStore(reducer, applyMiddleware(debouncer, testDataMiddleware));
   const actions = {
-    angular: bindActionCreators(angular.actions, store.dispatch),
+    // angular: bindActionCreators(angular.actions, store.dispatch),
     pushes: bindActionCreators(pushes.actions, store.dispatch),
   };
 

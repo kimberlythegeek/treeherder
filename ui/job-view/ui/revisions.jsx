@@ -1,4 +1,4 @@
-import { connect } from "react-redux";
+import { linkifyBugsFilter } from "./repo";
 
 const MoreRevisionsLink = props => (
     <li>
@@ -74,8 +74,6 @@ const RevisionItem = (props) => {
     </li>;
 };
 
-const mapStateToProps = ({ angular }) => ({ angular });
-
 const RevisionListComponent = (props) => {
     const hasMore = props.resultset.revision_count > props.resultset.revisions.length;
     return (
@@ -83,7 +81,7 @@ const RevisionListComponent = (props) => {
             <ul className="list-unstyled">
                 {props.resultset.revisions.map((revision, i) =>
                     <RevisionItem
-                        linkifyBugsFilter={props.angular.linkifyBugsFilter}
+                        linkifyBugsFilter={linkifyBugsFilter}
                         revision={revision}
                         repo={props.repo}
                         key={i} />
@@ -98,4 +96,4 @@ const RevisionListComponent = (props) => {
     );
 };
 
-export const RevisionList = connect(mapStateToProps)(RevisionListComponent);
+export const RevisionList = RevisionListComponent;

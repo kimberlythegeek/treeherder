@@ -1,25 +1,25 @@
 import { connect } from "react-redux";
 import { store, actions } from '../redux/store';
+import { $rootScope, thResultStatus, thEvents, thResultStatusInfo, thUrl, ThResultSetStore } from "./repo";
 
 export const JobCountComponent = (props) => {
   const classes = [props.className, 'btn group-btn btn-xs job-group-count filter-shown'];
   return (
     <button className={classes.join(' ')}
             title={props.title}
-            onClick={props.onClick}
+            // onClick={props.onClick}
             key={props.countKey}>{props.count}</button>
   );
 };
 
-const mapStateToProps = ({ angular, pushes }) => ({
-  angular,
+const mapStateToProps = ({ pushes }) => ({
   pushes
 });
 
 class JobButtonComponent extends React.Component {
   constructor(props) {
     super(props);
-    const status = this.props.angular.thResultStatus(this.props.job);
+    const status = thResultStatus(this.props.job);
 
     this.state = {
       runnable: (status === 'runnable')
@@ -28,8 +28,8 @@ class JobButtonComponent extends React.Component {
     this.handleJobClick = this.handleJobClick.bind(this);
 
     if (!this.props.hasGroup) {
-      this.props.angular.$rootScope.$on(
-        this.props.angular.thEvents.changeSelection, this.changeJobSelection
+      $rootScope.$on(
+        thEvents.changeSelection, this.changeJobSelection
       );
     }
   }
@@ -37,28 +37,28 @@ class JobButtonComponent extends React.Component {
   handleJobClick() {
     store.dispatch(actions.pushes.selectJob(
       this.props.job,
-      this.props.angular.$rootScope
+      $rootScope
     ));
-    this.props.angular.$rootScope.selectedJob = this.props.job;
-    this.props.angular.$rootScope.$emit(this.props.angular.thEvents.jobClick, this.props.job);
+    $rootScope.selectedJob = this.props.job;
+    $rootScope.$emit(thEvents.jobClick, this.props.job);
   }
 
   handleLogViewerClick() {
     // Open logviewer in a new window
     this.props.ThJobModel.get(
-      this.props.angular.$rootScope.repoName,
+      $rootScope.repoName,
       this.props.job.id
     ).then((data) => {
       if (data.logs.length > 0) {
         window.open(location.origin + '/' +
-          this.props.angular.thUrl.getLogViewerUrl(this.props.job.id));
+          thUrl.getLogViewerUrl(this.props.job.id));
       }
     });
   }
 
   handleRunnableClick() {
-    this.props.angular.ThResultSetStore.toggeleSelectedRunnableJob(
-      this.props.angular.$rootScope.repoName,
+    ThResultSetStore.toggeleSelectedRunnableJob(
+      $rootScope.repoName,
       this.context.resultsetId,
       this.props.job.ref_data_name
     );
@@ -78,8 +78,8 @@ class JobButtonComponent extends React.Component {
 
   render() {
     if (!this.props.job.visible) return null;
-    const status = this.props.angular.thResultStatus(this.props.job);
-    const statusInfo = this.props.angular.thResultStatusInfo(status, this.props.job.failure_classification_id);
+    const status = thResultStatus(this.props.job);
+    const statusInfo = thResultStatusInfo(status, this.props.job.failure_classification_id);
     let title = `${this.props.job.job_type_name} - ${status}`;
 
     if (this.props.job.state === 'completed') {
@@ -106,7 +106,7 @@ class JobButtonComponent extends React.Component {
     if (this.props.job.visible) classes.push('filter-shown');
 
     const attributes = {
-      onMouseDown: this.handleJobClick,
+      // onMouseDown: this.handleJobClick,
       className: classes.join(' '),
       'data-jmkey': key,
       'data-ignore-job-clear-on-click': true,
