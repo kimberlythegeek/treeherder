@@ -111,7 +111,7 @@ test('Changing the platform dropdown in the Test Data Modal displays expected te
   fireEvent.click(windowsPlatform);
 
   // 'mozilla-central windows7-32 a11yr opt e10s stylo'
-  const existingTest = await waitForElement(() =>
+  const existingTest = await waitFor(() =>
     queryByTestId(seriesData2[0].id.toString()),
   );
   expect(existingTest).toBeInTheDocument();
